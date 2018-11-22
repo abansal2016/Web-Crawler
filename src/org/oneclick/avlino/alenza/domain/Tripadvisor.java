@@ -13,22 +13,33 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Tripadvisor {
-  public static void getHtml(WebDriver driver, int pagesToStore, String outputPath) {
+  String url;
+  String errorMsg;
+
+  public Tripadvisor() {
+    url = null;
+    errorMsg = null;
+  }
+
+  public void getHtml(WebDriver driver, int pagesToStore, String outputPath) {
 
     JSONObject obj = new JSONObject();
     int fileNo = 1;
     int pageNo = 1;
     int pageCount = 0;
 
-    //JavascriptExecutor jsx = (JavascriptExecutor) driver;
+    JavascriptExecutor jsx = (JavascriptExecutor) driver;
     String reviews;
     try {
       do {
+        errorMsg = "";
+        url = driver.getCurrentUrl() + "-->AlenzaCustomPageNo=" + pageNo++;
+        //errorMsg+= "URL=" + url + "\n";
+
         clickOnMore(driver);
-        //reviews = (String) jsx.executeScript("return document.getElementById('REVIEWS').outerHTML");
-        System.out.println("ASHU: " + driver.getCurrentUrl() + "-->AlenzaCustomPageNo=" + pageNo);
-        //obj.put(driver.getCurrentUrl() + "-->AlenzaCustomPageNo=" + pageNo++, reviews);
-        obj.put(driver.getCurrentUrl() + "-->AlenzaCustomPageNo=" + pageNo++, driver.getPageSource());
+        reviews = (String) jsx.executeScript("return document.getElementById('REVIEWS').outerHTML");
+        obj.put(url, reviews);
+        //obj.put(url, driver.getPageSource());
         pageCount++;
         if (pageCount == pagesToStore) {
           dumpHtmlToFile(obj, outputPath, fileNo++);
@@ -41,11 +52,12 @@ public class Tripadvisor {
         dumpHtmlToFile(obj, outputPath, fileNo);
 
     } catch (Exception e) {
-      System.out.println("ASHU: error in main loop" + e);
+      printMessage(e, "Error in main loop");
+      //System.out.println("ASHU: error in main loop for " url + e);
     }
   }
 
-  public static void dumpHtmlToFile(JSONObject obj, String outputPath, int fileNo) {
+  public void dumpHtmlToFile(JSONObject obj, String outputPath, int fileNo) {
     try {
       FileWriter file = new FileWriter(outputPath + "file" + fileNo);
       String newLine = System.getProperty("line.separator");
@@ -63,36 +75,36 @@ public class Tripadvisor {
     }
   }
 
-  public static void clickOnMore(WebDriver driver) {
+  public void clickOnMore(WebDriver driver) {
     try {
       new WebDriverWait(driver, 10).until(new Function<WebDriver, Boolean>() {
         @Override
         public Boolean apply(WebDriver driver) {
           try {
             List<WebElement> moreButton = driver.findElement(By.id("REVIEWS")).findElements(By.cssSelector("span[class='taLnk ulBlueLinks']"));
-            System.out.println("ASHU: moreButton size=" + moreButton.size());
+            errorMsg+= "moreButton size=" + moreButton.size() + "\n";
             if (moreButton.size() == 0)
               return true;
 
-            System.out.println("ASHU: moreButton text=" + moreButton.get(0).getText());
+            errorMsg+= "moreButton text=" + moreButton.get(0).getText() + "\n";
             if (moreButton.get(0).getText().equals("More")) {
               moreButton.get(0).click();
               waitForReviewsLoading(driver);
               return true;
             }
           } catch(Exception e) {
-            System.out.println("ASHU: error in click on More" + e);
+            printMessage(e, "Error in click on More");
             return false;
           }
           return true;
         }
       });
     } catch (Exception e) {
-      System.out.println("ASHU: error in function clickOnMore" + e);
+      printMessage(e, "Error in function clickOnMore");
     }
   }
 
-  public static void waitForReviewsLoading(WebDriver driver) {
+  public void waitForReviewsLoading(WebDriver driver) {
     new WebDriverWait(driver, 10).until(new Function<WebDriver, Boolean>() {
       @Override
       public Boolean apply(WebDriver driver) {
@@ -103,18 +115,18 @@ public class Tripadvisor {
               return false;
           return true;
         } catch(Exception e) {
-          System.out.println("ASHU: error in wait for reviews loading" + e);
+          printMessage(e, "Error in wait for reviews loading");
           return false;
         }
       }
     });
   }
 
-  public static boolean getNextButton(WebDriver driver){
+  public boolean getNextButton(WebDriver driver){
     while(true) {
       try {
         List<WebElement> nextList = driver.findElement(By.id("REVIEWS")).findElements(By.cssSelector("a[class*='nav next taLnk ui_button primary']"));
-        System.out.println("ASHU: nextlist size=" + nextList.size());
+        errorMsg+= "nextlist size=" + nextList.size() + "\n";
         if (nextList.size() == 0)
           return false;
 
@@ -127,16 +139,16 @@ public class Tripadvisor {
 
         nextList.get(0).click();
         waitForPageLoading(driver);
-        System.out.println("ASHU: page loading complete");
+        //System.out.println("ASHU: page loading complete");
         return true;
       } catch(Exception e) {
-        System.out.println("ASHU: some error in getNextButton " + e);
+        printMessage(e, "Some error in getNextButton");
         //return false;
       }
     }
   }
 
-  public static void waitForPageLoading(WebDriver driver){
+  public void waitForPageLoading(WebDriver driver){
     try {
       new WebDriverWait(driver, 10).until(new Function<WebDriver, Boolean>() {
         @Override
@@ -153,7 +165,17 @@ public class Tripadvisor {
       });
     }
     catch (Exception e) {
-      System.out.println("ASHU: error in wait for page loading " + e);
+      printMessage(e, "Error in wait for page loading");
     }
+  }
+
+  public void printMessage(Exception e, String msg) {
+    System.out.println("\n\n----ASHU: Error Starts----");
+    System.out.println(msg);
+    System.out.println("URL is " + url);
+    System.out.println("Module Stacktrace is as below:\n" + errorMsg);
+    System.out.println(e.toString()); //e.getMessage());
+    System.out.println("----ASHU: Error Ends----");
+    errorMsg = "";
   }
 }
