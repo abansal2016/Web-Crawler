@@ -19,7 +19,7 @@ public class Reviews extends Thread {
     try {
     driver.get(url);
     //Google.getHtml(driver, 5, outputPath);
-    Tripadvisor.getHtml(driver, 10, outputPath);
+    new Tripadvisor().getHtml(driver, 10, outputPath);
     driver.quit();
     } catch(Exception e) {
       System.out.println("Thread error" + e);
