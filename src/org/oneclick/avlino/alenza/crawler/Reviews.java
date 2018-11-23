@@ -19,11 +19,14 @@ public class Reviews extends Thread {
     try {
     driver.get(url);
     //Google.getHtml(driver, 5, outputPath);
-    new Tripadvisor().getHtml(driver, 10, outputPath);
-    driver.quit();
+    new Amazon().getHtml(driver, 1000, outputPath);
+    //driver.quit();
+    System.out.println("Loading complete of URL: " + url);
     } catch(Exception e) {
-      System.out.println("Thread error" + e);
+      System.out.println("Thread error in loading URL: " + url);
+      System.out.println("Thread error \n" + e);
     }
+    driver.quit();
 
 /*    String domain = null;
     try {
