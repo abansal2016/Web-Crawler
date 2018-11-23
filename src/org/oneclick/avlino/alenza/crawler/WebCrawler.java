@@ -30,8 +30,8 @@ public class WebCrawler {
     //String url = "https://www.google.com/search?q=drunkart&ie=utf-8&oe=utf-8&client=firefox-b-ab";
 
     boolean enableFlashPlayer = false;
-    int loadStylesheet = 2;
-    int loadImage = 2;
+    int loadStylesheet = 1;
+    int loadImage = 1;
     String seleniumGridBinary = "/home/abhishek.bansal/AlenzaWebDataCollection/selenium-req/firefox/firefox";
     boolean makeHeadless = false;
 
@@ -62,7 +62,7 @@ public class WebCrawler {
     try {
       while ((url = br.readLine()) != null) {
         try {
-          System.out.println("Opening URL" + urlNo++ + ": " + url);
+          System.out.println("Opening URL" + urlNo + ": " + url);
 
           driver = new RemoteWebDriver(new URL(seleniumHubProtocol, seleniumHubHost, seleniumHubPort, seleniumHubPath), options);
           System.out.println("Selenium driver has been instantiated for " + url);
