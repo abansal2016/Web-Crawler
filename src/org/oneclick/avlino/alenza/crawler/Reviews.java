@@ -19,7 +19,7 @@ public class Reviews extends Thread {
     try {
     driver.get(url);
     //Google.getHtml(driver, 5, outputPath);
-    new Amazon().getHtml(driver, 1000, outputPath);
+    new CodeBetter().getHtml(driver, 100, outputPath);
     //driver.quit();
     System.out.println("Loading complete of URL: " + url);
     } catch(Exception e) {
