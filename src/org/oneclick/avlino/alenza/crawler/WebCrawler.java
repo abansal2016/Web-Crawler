@@ -62,10 +62,10 @@ public class WebCrawler {
     try {
       while ((url = br.readLine()) != null) {
         try {
-          System.out.println("Opening URL" + urlNo + ": " + url);
+          //System.out.println("Opening URL" + urlNo + ": " + url);
 
           driver = new RemoteWebDriver(new URL(seleniumHubProtocol, seleniumHubHost, seleniumHubPort, seleniumHubPath), options);
-          System.out.println("Selenium driver has been instantiated for " + url);
+          //System.out.println("Selenium driver has been instantiated for " + url);
 
           new Reviews(driver, url, outputPath + "/URL" + urlNo).start();
 
@@ -73,6 +73,8 @@ public class WebCrawler {
           System.out.println("Error in main process: initializing webdriver for " + url + "\n" + e);
         }
         urlNo++;
+        //Cant have this here as thread is used for driver and driver will quit as soon as it starts 
+        //driver.quit();
       }
     } catch (Exception e) {
       System.out.println("Error in main process: reading file" + e);

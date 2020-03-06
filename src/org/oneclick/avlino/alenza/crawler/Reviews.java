@@ -19,13 +19,14 @@ public class Reviews extends Thread {
     try {
     driver.get(url);
     //Google.getHtml(driver, 5, outputPath);
-    new CodeBetter().getHtml(driver, 100, outputPath);
+    new ServiceCentre().getHtml(driver, 100, outputPath);
     //driver.quit();
-    System.out.println("Loading complete of URL: " + url);
+    //System.out.println("Loading complete of URL: " + url);
     } catch(Exception e) {
       System.out.println("Thread error in loading URL: " + url);
       System.out.println("Thread error \n" + e);
     }
+    //driver quit moved to WebCrawler class
     driver.quit();
 
 /*    String domain = null;

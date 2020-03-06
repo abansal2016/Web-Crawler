@@ -19,42 +19,83 @@ public class ServiceCentre {
     int fileNo = 1;
 
     int storeNo = 0;
+    boolean newStoreFound = true;
     String baseURL = driver.getCurrentUrl();
 
     do {
       waitForPageLoading(driver);
-      System.out.println("Waiting for page load complete");
+      //System.out.println("Waiting for page load complete");
       List<WebElement> centreList = driver.findElements(By.className("section-result"));
 
       if (centreList.size() == 0) {
-        cprint("No results found");
-        getStoreDetails(driver, baseURL, storeNo);
-        getAllReviews(driver, baseURL, storeNo);
-
+        //System.out.println("No results found");
         return;
       }
-      cprint("No of stores = " + centreList.size());
+      //System.out.println("No of stores = " + centreList.size());
 
       if (centreList.size() == storeNo) {
-        cprint("All stores covered");
+        //System.out.println("All stores covered");
         return;
+      }
+
+      String storeName, storeRating, storeAddress, storePhone, storeReviewCount;
+
+      storeName = centreList.get(storeNo).findElement(By.className("section-result-title")).getText();
+      //System.out.println("Store Name = " + storeName);
+
+      try {
+        storeRating = centreList.get(storeNo).findElement(By.className("cards-rating-score")).getText();
+        //System.out.println("Store Rating = " + storeRating);
+      } catch (Exception e) {
+        storeRating = "";
       }
 
       try {
-      cprint("Clicking");
-      centreList.get(storeNo).click();
-      waitForPageLoading1(driver);
-      cprint("Waiting for review page load complete");
-      } catch(Exception e) {
-        cprint("Error in clicking store: " + storeNo + e);
+        storeReviewCount = centreList.get(storeNo).findElement(By.cssSelector("span[class='section-result-num-ratings']")).getText();
+      } catch (Exception e) {
+        storeReviewCount = "0";
       }
 
-      getStoreDetails(driver, baseURL, storeNo);
+      centreList.get(storeNo).click();
+      waitForPageLoading1(driver);
+      //System.out.println("Waiting for review page load complete");
 
-      getAllReviews(driver, baseURL, storeNo);
+      storeAddress = driver.findElement(By.cssSelector("span[aria-label='Address']")).findElement(By.xpath("./..")).getText();
+      //System.out.println("Store Address = " + storeAddress);
+
+      storePhone = driver.findElement(By.cssSelector("span[aria-label='Phone']")).findElement(By.xpath("./..")).getText();
+      //System.out.println("Store Phone = " + storePhone);
+
+      System.out.println("StoreRef=" + baseURL + "+StoreNo=" + storeNo + "\t" + storeName + "\t" + storePhone + "\t" + storeAddress + "\t" + storeRating + "\t" + storeReviewCount);
+
+      try {
+        WebElement allReviewsButton = driver.findElement(By.cssSelector("span[class='allxGeDnJMl__text gm2-button-alt']"));
+        allReviewsButton.click();
+
+        waitForPageLoading2(driver);
+        scrollReviews(driver);
+        //System.out.println("Scrolling complete");
+
+        List<WebElement> allReviews = driver.findElements(By.cssSelector("div[class='section-review ripple-container']"));
+        for (WebElement review: allReviews) {
+          /*System.out.println("\nReviewer Name: " + review.findElement(By.className("section-review-title")).getText());
+          System.out.println("Review star: " + review.findElement(By.className("section-review-stars")).getAttribute("aria-label"));
+          System.out.println("Review Date: " + review.findElement(By.className("section-review-publish-date")).getText());
+          System.out.println("Review: " + review.findElement(By.className("section-review-text")).getText());*/
+
+          System.out.println(baseURL + "+StoreNo=" + storeNo + "\t" + //storeName + "\t" + storeRating + "\t" + storePhone + "\t" +
+                             review.findElement(By.className("section-review-title")).getText() + "\t" +
+                             review.findElement(By.className("section-review-stars")).getAttribute("aria-label") + "\t" +
+                             review.findElement(By.className("section-review-publish-date")).getText() + "\t" +
+                             review.findElement(By.className("section-review-text")).getText().replace("\n", "."));
+        }
+      } catch (Exception e) {
+          //System.out.println("No reviews");
+      }
 
       //WebElement backButton = driver.findElement(By.cssSelector("button[class='section-back-to-list-button blue-link noprint']"));
       //backButton.click();
+      //driver.navigate().back();
       //driver.navigate().back();
       driver.navigate().to(baseURL);
       storeNo++;
@@ -62,7 +103,30 @@ public class ServiceCentre {
       //WebElement allReviewsButton = driver.findElements(By.cssSelector("span[class='allxGeDnJMl__text gm2-button-alt']"));
     } while(true);
 
-    /*obj.put(driver.getCurrentUrl(), driver.getPageSource());
+    /*List<WebElement> allReviewsButton = driver.findElements(By.cssSelector("a[data-reply_source='local-search-reviews-list']"));
+    if (allReviewsButton.size() == 0)
+      return;
+
+    allReviewsButton.get(0).click();
+    waitForPageLoading(driver);
+
+    JavascriptExecutor jsx = (JavascriptExecutor) driver;
+
+    long oldReviewsHeight, newReviewsHeight = 0;
+    long start;
+
+    do {
+      oldReviewsHeight = newReviewsHeight;
+      jsx.executeScript("document.getElementsByClassName('review-dialog-list')[0].scrollTop=arguments[0]", oldReviewsHeight);
+      start = System.currentTimeMillis();
+      do {
+        newReviewsHeight = (long) jsx.executeScript("return document.getElementsByClassName('review-dialog-list')[0].scrollHeight");
+        if (oldReviewsHeight != newReviewsHeight) //height changed = scroll down complete, therefore break the while loop
+          break;
+      } while (System.currentTimeMillis() - start < 3000); //wait for 3 seconds to load the next set of reviews
+    } while(oldReviewsHeight != newReviewsHeight); //height not changed = no further reviews, therefore all reviews loaded, break the while loop
+
+    obj.put(driver.getCurrentUrl(), driver.getPageSource());
 
     try {
       FileWriter file = new FileWriter(outputPath + "file" + fileNo);
@@ -100,7 +164,7 @@ public class ServiceCentre {
       });
     }
     catch (Exception e) {
-      cprint("Error in waiting for page load" + e);
+      //System.out.println("Error in waiting for page load" + e);
     }
   }
 
@@ -127,7 +191,7 @@ public class ServiceCentre {
       });
     }
     catch (Exception e) {
-      cprint("Error in waiting1 for page load" + e);
+      //System.out.println("Error in waiting1 for page load" + e);
     }
   }
 
@@ -153,54 +217,7 @@ public class ServiceCentre {
       });
     }
     catch (Exception e) {
-      cprint("Error in waiting2 for page load" + e);
-    }
-  }
-
-  public static void getStoreDetails(WebDriver driver, String baseURL, int storeNo) {
-    String storeName, storeRating, storeAddress, storePhone, storeReviewCount;
-
-    storeName = driver.findElement(By.className("section-hero-header-title-title")).getText();
-
-    try {
-      storeRating = driver.findElement(By.className("section-star-display")).getText();
-    } catch (Exception e) {
-      storeRating = "";
-    }
-
-    storeAddress = driver.findElement(By.cssSelector("span[aria-label='Address']")).findElement(By.xpath("./..")).getText();
-
-    storePhone = driver.findElement(By.cssSelector("span[aria-label='Phone']")).findElement(By.xpath("./..")).getText();
-
-    try {
-      storeReviewCount = driver.findElement(By.className("section-rating-term-list")).getText();
-    } catch (Exception e) {
-     storeReviewCount = "0";
-    }
-
-    System.out.println("StoreRef=" + baseURL + "+StoreNo=" + storeNo + "\t" + storeName + "\t" + storePhone + "\t" + storeAddress + "\t" + storeRating + "\t" + storeReviewCount);
-  }
-
-  public static void getAllReviews(WebDriver driver, String baseURL, int storeNo) {
-    try {
-      WebElement allReviewsButton = driver.findElement(By.cssSelector("span[class='allxGeDnJMl__text gm2-button-alt']"));
-
-      allReviewsButton.click();
-      waitForPageLoading2(driver);
-
-      scrollReviews(driver);
-      //System.out.println("Scrolling complete");
-
-      List<WebElement> allReviews = driver.findElements(By.cssSelector("div[class='section-review ripple-container']"));
-      for (WebElement review: allReviews) {
-        System.out.println(baseURL + "+StoreNo=" + storeNo + "\t" + //storeName + "\t" + storeRating + "\t" + storePhone + "\t" +
-                           review.findElement(By.className("section-review-title")).getText() + "\t" +
-                           review.findElement(By.className("section-review-stars")).getAttribute("aria-label") + "\t" +
-                           review.findElement(By.className("section-review-publish-date")).getText() + "\t" +
-                           review.findElement(By.className("section-review-text")).getText().replace("\n", "."));
-      }
-    } catch (Exception e) {
-      cprint("No reviews");
+      //System.out.println("Error in waiting2 for page load" + e);
     }
   }
 
@@ -220,10 +237,6 @@ public class ServiceCentre {
       } while (System.currentTimeMillis() - start < 3000); //wait for 3 seconds to load the next set of reviews
     } while(oldReviewsHeight != newReviewsHeight); //height not changed = no further reviews, therefore all reviews loaded, break the while loop
 
-  }
-
-  public static void cprint(String msg) {
-    System.out.println(msg); 
   }
 
 }

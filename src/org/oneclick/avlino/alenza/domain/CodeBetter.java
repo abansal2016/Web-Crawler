@@ -31,6 +31,7 @@ public class CodeBetter extends BaseDomain {
 
         //reviews = (String) jsx.executeScript("return document.getElementById('REVIEWS').outerHTML");
         //obj.put(url, reviews);
+        url = driver.getCurrentUrl();
         obj.put(url, driver.getPageSource());
         pageCount++;
         if (pageCount == pagesToStore) {
