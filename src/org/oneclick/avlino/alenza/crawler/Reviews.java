@@ -26,7 +26,7 @@ public class Reviews extends Thread {
       System.out.println("Thread error in loading URL: " + url);
       System.out.println("Thread error \n" + e);
     }
-    //driver quit moved to WebCrawler class
+    //driver quit moved to WebCrawler class-old comment ignore
     driver.quit();
 
 /*    String domain = null;

@@ -30,8 +30,8 @@ public class WebCrawler {
     //String url = "https://www.google.com/search?q=drunkart&ie=utf-8&oe=utf-8&client=firefox-b-ab";
 
     boolean enableFlashPlayer = false;
-    int loadStylesheet = 1;
-    int loadImage = 1;
+    int loadStylesheet = 2;
+    int loadImage = 2;
     String seleniumGridBinary = "/home/abhishek.bansal/AlenzaWebDataCollection/selenium-req/firefox/firefox";
     boolean makeHeadless = false;
 

@@ -20,6 +20,7 @@ public class ServiceCentre {
 
     int storeNo = 0;
     String baseURL = driver.getCurrentUrl();
+    JavascriptExecutor jsx = (JavascriptExecutor) driver;
 
     do {
       waitForPageLoading(driver);
@@ -42,7 +43,9 @@ public class ServiceCentre {
 
       try {
       cprint("Clicking");
-      centreList.get(storeNo).click();
+      //centreList.get(storeNo).click();
+      jsx.executeScript("arguments[0].click();", centreList.get(storeNo));
+
       waitForPageLoading1(driver);
       cprint("Waiting for review page load complete");
       } catch(Exception e) {
@@ -144,7 +147,8 @@ public class ServiceCentre {
             jQueryStatus = (boolean) jsx.executeScript("return jQuery.active==0");
 
           boolean buttonStatus = false;
-          List<WebElement> nextList = driver.findElements(By.cssSelector("div[class='section-listbox section-scrollbox scrollable-y scrollable-show']"));
+          //List<WebElement> nextList = driver.findElements(By.cssSelector("div[class='section-listbox section-scrollbox scrollable-y scrollable-show']"));
+          List<WebElement> nextList = driver.findElements(By.cssSelector("div[class='section-layout section-scrollbox scrollable-y scrollable-show']"));
           if (nextList.size() != 0)
             buttonStatus = true;
 
@@ -160,7 +164,11 @@ public class ServiceCentre {
   public static void getStoreDetails(WebDriver driver, String baseURL, int storeNo) {
     String storeName, storeRating, storeAddress, storePhone, storeReviewCount;
 
-    storeName = driver.findElement(By.className("section-hero-header-title-title")).getText();
+    try {
+      storeName = driver.findElement(By.className("section-hero-header-title-title")).getText();
+    } catch (Exception e) {
+      storeName = "Store name not found";
+    }
 
     try {
       storeRating = driver.findElement(By.className("section-star-display")).getText();
@@ -168,9 +176,19 @@ public class ServiceCentre {
       storeRating = "";
     }
 
-    storeAddress = driver.findElement(By.cssSelector("span[aria-label='Address']")).findElement(By.xpath("./..")).getText();
+    try {
+      //storeAddress = driver.findElement(By.cssSelector("span[aria-label='Address']")).findElement(By.xpath("./..")).getText();
+      storeAddress = driver.findElement(By.cssSelector("button[data-tooltip='Copy address']")).getAttribute("aria-label");
+    } catch (Exception e) {
+      storeAddress = "Address not found";
+    }
 
-    storePhone = driver.findElement(By.cssSelector("span[aria-label='Phone']")).findElement(By.xpath("./..")).getText();
+    try {
+      //storePhone = driver.findElement(By.cssSelector("span[aria-label='Phone']")).findElement(By.xpath("./..")).getText();
+      storePhone = driver.findElement(By.cssSelector("button[data-tooltip='Copy phone number']")).getAttribute("data-item-id");
+    } catch (Exception e) {
+      storePhone = "Phone number not found";
+    }
 
     try {
       storeReviewCount = driver.findElement(By.className("section-rating-term-list")).getText();
@@ -178,7 +196,8 @@ public class ServiceCentre {
      storeReviewCount = "0";
     }
 
-    System.out.println("StoreRef=" + baseURL + "+StoreNo=" + storeNo + "\t" + storeName + "\t" + storePhone + "\t" + storeAddress + "\t" + storeRating + "\t" + storeReviewCount);
+    System.out.println("StoreRef=" + baseURL + "+StoreNo=" + storeNo + "\t" + storeName + "\t" + storePhone + "\t" + 
+                        storeAddress + "\t" + storeRating + "\t" + storeReviewCount);
   }
 
   public static void getAllReviews(WebDriver driver, String baseURL, int storeNo) {
@@ -189,9 +208,11 @@ public class ServiceCentre {
       waitForPageLoading2(driver);
 
       scrollReviews(driver);
-      //System.out.println("Scrolling complete");
+      System.out.println("Scrolling complete");
 
-      List<WebElement> allReviews = driver.findElements(By.cssSelector("div[class='section-review ripple-container']"));
+      List<WebElement> allReviews = driver.findElements(By.cssSelector("div[class*='section-review ripple-container']"));
+      System.out.println("Count of reviews=" + allReviews.size());
+
       for (WebElement review: allReviews) {
         System.out.println(baseURL + "+StoreNo=" + storeNo + "\t" + //storeName + "\t" + storeRating + "\t" + storePhone + "\t" +
                            review.findElement(By.className("section-review-title")).getText() + "\t" +
