@@ -13,18 +13,18 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class ServiceCentre {
-  public static void getHtml(WebDriver driver, int PagesToStore, String outputPath) {
+  public static void getHtml(WebDriver driver, String baseURL, int PagesToStore, String outputPath) {
 
     JSONObject obj = new JSONObject();
     int fileNo = 1;
 
     int storeNo = 0;
-    String baseURL = driver.getCurrentUrl();
+    //String baseURL = driver.getCurrentUrl();
     JavascriptExecutor jsx = (JavascriptExecutor) driver;
 
     do {
       waitForPageLoading(driver);
-      System.out.println("Waiting for page load complete");
+      cprint("Waiting for page load complete");
       List<WebElement> centreList = driver.findElements(By.className("section-result"));
 
       if (centreList.size() == 0) {
@@ -178,26 +178,41 @@ public class ServiceCentre {
 
     try {
       //storeAddress = driver.findElement(By.cssSelector("span[aria-label='Address']")).findElement(By.xpath("./..")).getText();
-      storeAddress = driver.findElement(By.cssSelector("button[data-tooltip='Copy address']")).getAttribute("aria-label");
+      storeAddress = driver.findElement(By.cssSelector("button[data-tooltip='Copy address']"))
+                           .getAttribute("aria-label")
+                           .replace("Address: ", "");
     } catch (Exception e) {
       storeAddress = "Address not found";
     }
 
     try {
       //storePhone = driver.findElement(By.cssSelector("span[aria-label='Phone']")).findElement(By.xpath("./..")).getText();
-      storePhone = driver.findElement(By.cssSelector("button[data-tooltip='Copy phone number']")).getAttribute("data-item-id");
+      storePhone = driver.findElement(By.cssSelector("button[data-tooltip='Copy phone number']"))
+                         .getAttribute("data-item-id")
+                         .replace("phone:tel:", "");
     } catch (Exception e) {
       storePhone = "Phone number not found";
     }
 
     try {
-      storeReviewCount = driver.findElement(By.className("section-rating-term-list")).getText();
+      storeReviewCount = driver.findElement(By.className("section-rating-term-list"))
+                               .getText()
+                               .replace("(", "")
+                               .replace(")", "");
     } catch (Exception e) {
      storeReviewCount = "0";
     }
 
-    System.out.println("StoreRef=" + baseURL + "+StoreNo=" + storeNo + "\t" + storeName + "\t" + storePhone + "\t" + 
-                        storeAddress + "\t" + storeRating + "\t" + storeReviewCount);
+    String url_print = "SR=" +
+                       baseURL.replace("https://www.google.com/maps/search/", "")
+                              .replace("service+centre+", "")
+                              .replace("vivo", "v")
+                              .replace("samsung", "s")
+                              .replace("oppo", "o")
+                              .replace("xiaomi", "x")
+                       + "+" + storeNo;
+    System.out.println(url_print + "\t" + storeName + "\t" + storePhone + "\t" + 
+                       storeAddress + "\t" + storeRating + "\t" + storeReviewCount);
   }
 
   public static void getAllReviews(WebDriver driver, String baseURL, int storeNo) {
@@ -208,15 +223,26 @@ public class ServiceCentre {
       waitForPageLoading2(driver);
 
       scrollReviews(driver);
-      System.out.println("Scrolling complete");
+      cprint("Scrolling complete");
 
       List<WebElement> allReviews = driver.findElements(By.cssSelector("div[class*='section-review ripple-container']"));
-      System.out.println("Count of reviews=" + allReviews.size());
+      cprint("Count of reviews=" + allReviews.size());
+
+      String url_print = baseURL.replace("https://www.google.com/maps/search/", "")
+                                .replace("service+centre+", "")
+                                .replace("vivo", "v")
+                                .replace("samsung", "s")
+                                .replace("oppo", "o")
+                                .replace("xiaomi", "x")
+                         + "+" + storeNo;
 
       for (WebElement review: allReviews) {
-        System.out.println(baseURL + "+StoreNo=" + storeNo + "\t" + //storeName + "\t" + storeRating + "\t" + storePhone + "\t" +
+        System.out.println(url_print + "\t" + //storeName + "\t" + storeRating + "\t" + storePhone + "\t" +
                            review.findElement(By.className("section-review-title")).getText() + "\t" +
-                           review.findElement(By.className("section-review-stars")).getAttribute("aria-label") + "\t" +
+                           review.findElement(By.className("section-review-stars"))
+                                                .getAttribute("aria-label")
+                                                .replace(" stars", "")
+                                                .replace(" star", "") + "\t" +
                            review.findElement(By.className("section-review-publish-date")).getText() + "\t" +
                            review.findElement(By.className("section-review-text")).getText().replace("\n", "."));
       }
@@ -244,7 +270,7 @@ public class ServiceCentre {
   }
 
   public static void cprint(String msg) {
-    System.out.println(msg); 
+    //System.out.println(msg); 
   }
 
 }

@@ -33,7 +33,7 @@ public class WebCrawler {
     int loadStylesheet = 2;
     int loadImage = 2;
     String seleniumGridBinary = "/home/abhishek.bansal/AlenzaWebDataCollection/selenium-req/firefox/firefox";
-    boolean makeHeadless = false;
+    boolean makeHeadless = true;
 
     String seleniumHubProtocol = "http";
     String seleniumHubHost = "localhost";
